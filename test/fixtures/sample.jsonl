@@ -1,0 +1,5 @@
+{"type":"surfaceUpdate","surfaceId":"dashboard","components":[{"id":"root","type":"Container","props":{"padding":16},"children":["header","content"]}]}
+{"type":"surfaceUpdate","surfaceId":"dashboard","components":[{"id":"header","type":"Text","props":{"text":"Dashboard"}},{"id":"content","type":"Row","props":{"spacing":8},"children":["stats","actions"]}]}
+{"type":"surfaceUpdate","surfaceId":"dashboard","components":[{"id":"stats","type":"Text","props":{"text":"Users: 1234"}},{"id":"actions","type":"Button","props":{"label":"Refresh"}}]}
+{"type":"dataModelUpdate","surfaceId":"dashboard","dataModel":{"title":"Overview","users":1234}}
+{"type":"beginRendering","surfaceId":"dashboard","rootComponentId":"root","catalog":{"Text":"span","Container":"div","Row":"div.row","Button":"button"}}

@@ -1,0 +1,33 @@
+{
+  "name": "agent-protocol-inspector",
+  "version": "0.1.0",
+  "description": "Validate, analyze, and debug A2UI agent-to-UI protocol streams",
+  "main": "dist/index.js",
+  "bin": {
+    "a2ui": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "node dist/cli.js validate < test/fixtures/sample.jsonl"
+  },
+  "keywords": [
+    "a2ui",
+    "agent",
+    "protocol",
+    "ui",
+    "mcp",
+    "inspector",
+    "debugger"
+  ],
+  "author": "Orosha <oroshai@github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orosha-ai/agent-protocol-inspector"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.3"
+  }
+}
