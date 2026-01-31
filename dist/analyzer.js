@@ -143,6 +143,49 @@ class A2UIAnalyzer {
         }
         return bindings;
     }
+    /**
+     * Analyze and return structured JSON output
+     */
+    analyzeJSON(surface) {
+        const stats = this.analyzeDataModel(surface);
+        const warnings = [];
+        // Collect warnings
+        if (stats.boundComponents === 0 && surface.components.size > 5) {
+            warnings.push(`Large component tree (${surface.components.size} comps) but no data bindings detected`);
+        }
+        if (stats.totalKeys === 0 && surface.components.size > 0) {
+            warnings.push(`No data model defined, but ${surface.components.size} components exist`);
+        }
+        // Build simplified data model tree
+        const dataModelTree = this.buildDataModelTree(surface.dataModel || {});
+        const { surfaceId: _surfaceId, ...rest } = stats;
+        return {
+            ...rest,
+            warnings,
+            dataModelTree
+        };
+    }
+    /**
+     * Build simplified tree from data model
+     */
+    buildDataModelTree(obj, depth = 0) {
+        if (depth > 5) {
+            return { _maxDepth: true };
+        }
+        const result = {};
+        for (const [key, value] of Object.entries(obj)) {
+            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                result[key] = this.buildDataModelTree(value, depth + 1);
+            }
+            else if (Array.isArray(value)) {
+                result[key] = { _type: 'array', _length: value.length };
+            }
+            else {
+                result[key] = { _type: typeof value, _value: value };
+            }
+        }
+        return result;
+    }
 }
 exports.A2UIAnalyzer = A2UIAnalyzer;
 //# sourceMappingURL=analyzer.js.map

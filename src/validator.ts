@@ -344,6 +344,91 @@ export class A2UIValidator {
   }
 
   /**
+   * Validate and return structured JSON output
+   */
+  async validateJSON(inputPath?: string): Promise<{
+    valid: boolean;
+    errors: ValidationError[];
+    warnings: ValidationWarning[];
+    stats: {
+      messageCount: number;
+      surfaceCount: number;
+      componentCount: number;
+    };
+  }> {
+    const parsed = await this.parseStream(inputPath);
+    const warnings: ValidationWarning[] = [];
+
+    // Count messages
+    const messageCount = parsed.messages.length;
+
+    // Count surfaces and components
+    let surfaceCount = 0;
+    let componentCount = 0;
+    for (const surface of parsed.surfaces.values()) {
+      surfaceCount++;
+      componentCount += surface.components.size;
+    }
+
+    // Generate warnings (same as validate())
+    for (const [surfaceId, surface] of parsed.surfaces) {
+      const allIds = new Set(surface.components.keys());
+      const referencedIds = new Set<string>();
+
+      for (const comp of surface.components.values()) {
+        if (comp.children) {
+          for (const childId of comp.children) {
+            referencedIds.add(childId);
+          }
+        }
+      }
+
+      if (surface.rootId && !allIds.has(surface.rootId)) {
+        warnings.push({
+          line: 0,
+          message: `Surface "${surfaceId}": root component "${surface.rootId}" not found`,
+          code: 'ROOT_NOT_FOUND'
+        });
+      }
+
+      for (const id of allIds) {
+        if (id !== surface.rootId && !referencedIds.has(id)) {
+          warnings.push({
+            line: 0,
+            message: `Surface "${surfaceId}": component "${id}" has no parent`,
+            code: 'ORPHANED_COMPONENT'
+          });
+        }
+      }
+
+      for (const comp of surface.components.values()) {
+        if (comp.children) {
+          for (const childId of comp.children) {
+            if (!allIds.has(childId)) {
+              warnings.push({
+                line: 0,
+                message: `Surface "${surfaceId}": component "${comp.id}" references missing child "${childId}"`,
+                code: 'MISSING_CHILD_REFERENCE'
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      valid: parsed.errors.length === 0,
+      errors: parsed.errors,
+      warnings,
+      stats: {
+        messageCount,
+        surfaceCount,
+        componentCount
+      }
+    };
+  }
+
+  /**
    * Read from stdin
    */
   private async readStdin(): Promise<string[]> {

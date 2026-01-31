@@ -9,6 +9,14 @@ export interface DataModelStats {
     boundComponents: number;
     dataPaths: string[];
 }
+export interface DataModelAnalysis {
+    totalKeys: number;
+    valueTypes: Record<string, number>;
+    boundComponents: number;
+    dataPaths: string[];
+    warnings: string[];
+    dataModelTree: Record<string, unknown>;
+}
 export declare class A2UIAnalyzer {
     /**
      * Analyze data model for a surface
@@ -25,5 +33,13 @@ export declare class A2UIAnalyzer {
     private formatDataModel;
     private formatValue;
     private collectBindings;
+    /**
+     * Analyze and return structured JSON output
+     */
+    analyzeJSON(surface: SurfaceComponents): DataModelAnalysis;
+    /**
+     * Build simplified tree from data model
+     */
+    private buildDataModelTree;
 }
 //# sourceMappingURL=analyzer.d.ts.map

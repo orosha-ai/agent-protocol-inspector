@@ -1,7 +1,7 @@
 /**
  * A2UI Protocol Validator
  */
-import { ValidationResult, ParsedStream } from './types';
+import { ValidationResult, ValidationError, ValidationWarning, ParsedStream } from './types';
 export declare class A2UIValidator {
     /**
      * Parse and validate a JSONL stream from a file path or stdin
@@ -22,6 +22,19 @@ export declare class A2UIValidator {
      * Generate full validation report
      */
     validate(inputPath?: string): Promise<ValidationResult>;
+    /**
+     * Validate and return structured JSON output
+     */
+    validateJSON(inputPath?: string): Promise<{
+        valid: boolean;
+        errors: ValidationError[];
+        warnings: ValidationWarning[];
+        stats: {
+            messageCount: number;
+            surfaceCount: number;
+            componentCount: number;
+        };
+    }>;
     /**
      * Read from stdin
      */

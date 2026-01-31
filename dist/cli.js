@@ -68,6 +68,10 @@ class CLI {
                 case '-s':
                     parsed.strict = true;
                     break;
+                case '--json':
+                case '-j':
+                    parsed.json = true;
+                    break;
                 case '--color':
                 case '-c':
                     parsed.color = true;
@@ -97,6 +101,12 @@ class CLI {
         return parsed;
     }
     async validate(options) {
+        if (options.json) {
+            const result = await this.validator.validateJSON(options.file);
+            console.log(JSON.stringify(result, null, 2));
+            process.exit(result.valid ? 0 : 1);
+            return;
+        }
         console.log('🔍 Validating A2UI stream...\n');
         const result = await this.validator.validate(options.file);
         if (result.valid) {
@@ -143,6 +153,19 @@ class CLI {
     }
     async analyze(options) {
         const parsed = await this.validator.parseStream(options.file);
+        if (options.json) {
+            if (parsed.surfaces.size === 0) {
+                console.log(JSON.stringify({ error: 'No surfaces found' }));
+                process.exit(1);
+                return;
+            }
+            const results = [];
+            for (const [surfaceId, surface] of parsed.surfaces) {
+                results.push({ surfaceId, surfaceAnalysis: this.analyzer.analyzeJSON(surface) });
+            }
+            console.log(JSON.stringify({ surfaces: results, errors: parsed.errors }, null, 2));
+            return;
+        }
         if (parsed.errors.length > 0) {
             console.log('⚠️  Stream has errors...\n');
             for (const error of parsed.errors) {
@@ -230,6 +253,7 @@ Options:
   -t, --tree               Show ASCII tree visualization
   -d, --data-model         Analyze data model only
   -s, --strict             Exit with non-zero on errors
+  -j, --json              Output structured JSON for CI/automation
   -c, --color              Enable colored output
   --components <n>         Mock: number of components (default: 5)
   --surface <id>           Mock: surface ID (default: 'sample')
